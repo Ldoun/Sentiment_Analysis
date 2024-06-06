@@ -84,7 +84,7 @@ class Trainer():
             for batch in test_loader:
                 x = batch['input_ids'].to(self.device)
                 attention_mask = batch['attention_mask'].to(self.device)
-                output = self.model(x, attention_mask).detach().cpu().numpy()
+                output = self.model(x, attention_mask).detach().cpu().numpy().argmax(dim=-1)
                 result.append(output)
                 labels.append(batch['labels'].detach().cpu().numpy())
 
