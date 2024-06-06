@@ -8,7 +8,7 @@ class BERT(nn.Module):
         self.model = BertModel.from_pretrained("bert-base-uncased")
         self.tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
         self.linear = nn.Linear(self.model.config.hidden_size, num_classes)
-        self.softmax = nn.Softmax()
+        self.softmax = nn.Softmax(dim=-1)
         
     def forward(self, input_ids, attention_mask):
         outputs = self.model(input_ids=input_ids, attention_mask=attention_mask)
@@ -23,7 +23,7 @@ class GPT(nn.Module):
         self.model = OpenAIGPTModel.from_pretrained("openai-community/openai-gpt")
         self.tokenizer = BertTokenizer.from_pretrained("openai-community/openai-gpt")
         self.linear = nn.Linear(self.model.config.hidden_size, num_classes)
-        self.softmax = nn.Softmax()
+        self.softmax = nn.Softmax(dim=-1)
         
     def forward(self, input_ids, attention_mask):
         outputs = self.model(input_ids=input_ids, attention_mask=attention_mask)
@@ -39,7 +39,7 @@ class LSTM(nn.Module):
         self.tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
         self.emb = nn.Embedding(num_embeddings=len(self.tokenizer), embedding_dim=input_size)
         self.linear = nn.Linear(hidden_size*2, num_classes)
-        self.softmax = nn.Softmax()
+        self.softmax = nn.Softmax(dim=-1)
     
     def forward(self, input_ids, attention_mask):
         outputs = self.model(self.emb(input_ids))[0]
@@ -55,7 +55,7 @@ class RNN(nn.Module):
         self.tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
         self.emb = nn.Embedding(num_embeddings=len(self.tokenizer), embedding_dim=input_size)
         self.linear = nn.Linear(hidden_size*2, num_classes)
-        self.softmax = nn.Softmax()
+        self.softmax = nn.Softmax(dim=-1)
     
     def forward(self, input_ids, attention_mask):
         outputs = self.model(self.emb(input_ids))[0]
