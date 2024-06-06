@@ -44,10 +44,11 @@ class Trainer():
         total_loss = 0
         correct = 0
         for batch in tqdm(self.train_loader, file=sys.stdout): #tqdm output will not be written to logger file(will only written to stdout)
-            x, y = batch['data'].to(self.device), batch['label'].to(self.device)
+            x, y = batch['input_ids'].to(self.device), batch['labels'].to(self.device)
+            attention_mask = batch['attention_mask'].to(self.device)
 
             self.optimizer.zero_grad()
-            output = self.model(x)            
+            output = self.model(x, attention_mask)            
             loss = self.loss_fn(output, y)
             loss.backward()
             self.optimizer.step()
@@ -63,9 +64,10 @@ class Trainer():
             total_loss = 0
             correct = 0
             for batch in self.valid_loader:
-                x, y = batch['data'].to(self.device), batch['label'].to(self.device)
+                x, y = batch['input_ids'].to(self.device), batch['labels'].to(self.device)
+                attention_mask = batch['attention_mask'].to(self.device)
 
-                output = self.model(x)
+                output = self.model(x, attention_mask)
                 loss = self.loss_fn(output, y)
 
                 total_loss += loss.item() * x.shape[0]
@@ -78,9 +80,12 @@ class Trainer():
         self.model.eval()
         with torch.no_grad():
             result = []
+            labels = []
             for batch in test_loader:
-                x = batch['data'].to(self.device)
-                output = self.model(x).detach().cpu().numpy()
+                x = batch['input_ids'].to(self.device)
+                attention_mask = batch['attention_mask'].to(self.device)
+                output = self.model(x, attention_mask).detach().cpu().numpy()
                 result.append(output)
+                labels.append(batch['labels'].detach().cpu().numpy())
 
-        return np.concatenate(result,axis=0)
+        return np.concatenate(result,axis=0), np.concatenate(labels,axis=0)

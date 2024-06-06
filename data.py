@@ -1,38 +1,31 @@
 import torch
 from torch.utils.data import  Dataset
-
-
-def load_data(file):
-    pass #data loading func
-
-class DataSet(Dataset):
-    def __init__(self, file_list, label=None):
-        self.file_list = file_list
-        self.label = label
-
-    def __len__(self):
-        return len(self.file_list)
-    
-    def __getitem__(self, index):
-        if self.label is None:
-            return {'data' : torch.tensor(load_data(self.file_list[index]), dtype=torch.float)}
-        else:
-            return {'data' : torch.tensor(load_data(self.file_list[index]), dtype=torch.float), 
-                    'label' : torch.tensor(load_data(self.label[index]), dtype=torch.float)}
         
-class Preload_DataSet(Dataset):
-    def __init__(self, file_list, label=None):
-        self.file_list = file_list
+class TextDataSet(Dataset):
+    def __init__(self, text, label, tokenizer, max_length):
+        self.text = text
         self.label = label
+        self.tokenizer = tokenizer
+        self.max_length = max_length
 
-        self.data = torch.stack([load_data[file] for file in file_list])
 
     def __len__(self):
         return len(self.file_list)
     
     def __getitem__(self, index):
-        if self.label is None:
-            return {'data' : self.data[index]}
-        else:
-            return {'data' : self.data[index], 
-                    'label' : torch.tensor(load_data(self.label[index]), dtype=torch.float)}
+        encoding = self.tokenizer.encode_plus(
+            self.text[index],
+            add_special_tokens=True,
+            max_length=self.max_length,
+            return_token_type_ids=False,
+            padding='max_length',
+            return_attention_mask=True,
+            return_tensors='pt',
+            truncation=True
+        )
+        
+        return {
+            'input_ids': encoding['input_ids'].flatten(),
+            'attention_mask': encoding['attention_mask'].flatten(),
+            'labels': torch.tensor(self.label[index], dtype=torch.long)
+        }

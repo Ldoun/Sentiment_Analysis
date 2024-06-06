@@ -4,13 +4,14 @@ import logging
 import pandas as pd
 from functools import partial
 from sklearn.model_selection import StratifiedKFold
+from sklearn.metrics import accuracy_score, f1_score
 
 import torch
 from torch import optim, nn
 from torch.utils.data import DataLoader
 
-from models import Temp
-from data import DataSet
+import models
+from data import TextDataSet
 from trainer import Trainer
 from config import get_args
 from lr_scheduler import get_sch
@@ -35,25 +36,13 @@ if __name__ == "__main__":
     sys.excepthook = partial(handle_unhandled_exception,logger=logger)
 
     train_data = pd.read_csv(args.train)
-    train_data['path'] = train_data['path'].apply(lambda x: os.path.join(args.path, x))
     test_data = pd.read_csv(args.test)
-    test_data['path'] = test_data['path'].apply(lambda x: os.path.join(args.path, x))
-    #fix path based on the data dir
-
-    input_size = None
-    output_size = None
-
-    prediction = pd.read_csv(args.submission)
-    output_index = [f'{i}' for i in range(0, output_size)]
-    stackking_input = pd.DataFrame(columns = output_index, index=range(len(train_data))) #dataframe for saving OOF predictions
 
     if args.continue_train > 0:
-        prediction = pd.read_csv(os.path.join(result_path, 'sum.csv'))
-        test_result = prediction[output_index].values
-        stackking_input = pd.read_csv(os.path.join(result_path, f'for_stacking_input.csv'))
+        pass
 
     skf = StratifiedKFold(n_splits=args.cv_k, random_state=args.seed, shuffle=True) #Using StratifiedKFold for cross-validation    
-    for fold, (train_index, valid_index) in enumerate(skf.split(train_data['path'], train_data['label'])): #by skf every fold will have similar label distribution
+    for fold, (train_index, valid_index) in enumerate(skf.split(train_data['text'], train_data['sentiment'])): #by skf every fold will have similar label distribution
         if args.continue_train > fold+1:
             logger.info(f'skipping {fold+1}-fold')
             continue
@@ -68,13 +57,14 @@ if __name__ == "__main__":
         kfold_train_data = train_data.iloc[train_index]
         kfold_valid_data = train_data.iloc[valid_index]
 
-        train_dataset = DataSet(file_list=kfold_train_data['path'].values, label=kfold_train_data['label'].values)
-        valid_dataset = DataSet(file_list=kfold_valid_data['path'].values, label=kfold_valid_data['label'].values)
+        model = getattr(models, args.model)(args).to(device) #make model based on the model name and args
 
-        model = Temp(args).to(device) #make model based on the model name and args
+        train_dataset = TextDataSet(text=kfold_train_data['text'].values, label=kfold_train_data['sentiment'].values, tokenizer=model.tokenizer, max_length=args.max_length)
+        valid_dataset = TextDataSet(text=kfold_valid_data['text'].values, label=kfold_valid_data['sentiment'].values, tokenizer=model.tokenizer, max_length=args.max_length)
+
         loss_fn = nn.CrossEntropyLoss()
         optimizer = optim.Adam(model.parameters(), lr=args.lr)
-        scheduler = get_sch(args.scheduler)(optimizer)
+        scheduler = get_sch(args.scheduler, optimizer, warmup_epochs=args.warmup_epochs)
 
         train_loader = DataLoader(
             train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, #pin_memory=True
@@ -84,16 +74,14 @@ if __name__ == "__main__":
         )
         
         trainer = Trainer(
-            train_loader, valid_loader, model, loss_fn, optimizer, scheduler, device, args.patience, args.epochs, fold_result_path, fold_logger)
+            train_loader, valid_loader, model, loss_fn, optimizer, scheduler, device, args.patience, args.epochs, fold_result_path, fold_logger, tokenizer=model.tokenizer, max_length=args.max_length)
         trainer.train() #start training
 
-        test_dataset = DataSet(file_list=test_data['path'].values, label=test_data['label'].values)
+        test_dataset = TextDataSet(text=test_data['text'].values, label=test_data['sentiment'].values)
         test_loader = DataLoader(
             test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers
         ) #make test data loader
+        pred, target = trainer.test(test_loader)
 
-        prediction[output_index] += trainer.test(test_loader) #softmax applied output; accumulate test prediction of current fold model
-        prediction.to_csv(os.path.join(result_path, 'sum.csv'), index=False) 
-        
-        stackking_input.loc[valid_index, output_index] = trainer.test(valid_loader) #use the validation data(hold out dataset) to make input for Stacking Ensemble model(out of fold prediction)
-        stackking_input.to_csv(os.path.join(result_path, f'for_stacking_input.csv'), index=False)
+        fold_logger.info(f'Acc: {accuracy_score(target, pred)}')
+        fold_logger.info(f'F1: {f1_score(target, pred)}')
