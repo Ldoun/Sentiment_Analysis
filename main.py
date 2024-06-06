@@ -20,7 +20,7 @@ from utils import seed_everything, handle_unhandled_exception, save_to_json
 if __name__ == "__main__":
     args = get_args()
     seed_everything(args.seed) #fix seed
-    device = torch.device('cuda:0') #use cuda:0
+    device = torch.device(args.device) #use cuda:0
 
     if args.continue_train > 0:
         result_path = args.continue_from_folder

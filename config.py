@@ -7,6 +7,7 @@ def args_for_data(parser):
     parser.add_argument('--result_path', type=str, default='./result')
     
 def args_for_train(parser):
+    parser.add_argument('--device', type=str, default='cuda:0')
     parser.add_argument('--cv_k', type=int, default=10, help='k-fold stratified cross validation')
     parser.add_argument('--num_workers', type=int, default=4, help='num_workers')
     parser.add_argument('--batch_size', type=int, default=None, help='batch_size')
