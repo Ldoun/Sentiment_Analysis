@@ -42,7 +42,7 @@ class LSTM(nn.Module):
         self.softmax = nn.Softmax()
     
     def forward(self, input_ids, attention_mask):
-        outputs = self.model(self.emb(input_ids))
+        outputs = self.model(self.emb(input_ids))[0]
         x = torch.mean(outputs, dim=1)
         x = self.linear(x)
         x = self.softmax(x)
@@ -58,7 +58,7 @@ class RNN(nn.Module):
         self.softmax = nn.Softmax()
     
     def forward(self, input_ids, attention_mask):
-        outputs = self.model(self.emb(input_ids))
+        outputs = self.model(self.emb(input_ids))[0]
         x = torch.mean(outputs, dim=1)
         x = self.linear(x)
         x = self.softmax(x)
