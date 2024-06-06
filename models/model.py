@@ -38,7 +38,7 @@ class LSTM(nn.Module):
         self.model = nn.LSTM(input_size=input_size, hidden_size=hidden_size, num_layers=2, batch_first=True, bidirectional=True)
         self.tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
         self.emb = nn.Embedding(num_embeddings=len(self.tokenizer), embedding_dim=input_size)
-        self.linear = nn.Linear(self.model.config.hidden_size, num_classes)
+        self.linear = nn.Linear(hidden_size, num_classes)
         self.softmax = nn.Softmax()
     
     def forward(self, input_ids, attention_mask):
@@ -54,7 +54,7 @@ class RNN(nn.Module):
         self.model = nn.RNN(input_size=input_size, hidden_size=hidden_size, num_layers=2, batch_first=True, bidirectional=True)
         self.tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
         self.emb = nn.Embedding(num_embeddings=len(self.tokenizer), embedding_dim=input_size)
-        self.linear = nn.Linear(self.model.config.hidden_size, num_classes)
+        self.linear = nn.Linear(hidden_size, num_classes)
         self.softmax = nn.Softmax()
     
     def forward(self, input_ids, attention_mask):
