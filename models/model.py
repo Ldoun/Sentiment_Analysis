@@ -21,7 +21,7 @@ class GPT(nn.Module):
     def __init__(self, input_size, hidden_size, num_classes):
         super(GPT, self).__init__()
         self.model = OpenAIGPTModel.from_pretrained("openai-community/openai-gpt")
-        self.tokenizer = BertTokenizer.from_pretrained("openai-community/openai-gpt")
+        self.tokenizer = OpenAIGPTTokenizer.from_pretrained("openai-community/openai-gpt")
         self.linear = nn.Linear(self.model.config.hidden_size, num_classes)
         self.softmax = nn.Softmax(dim=-1)
         
