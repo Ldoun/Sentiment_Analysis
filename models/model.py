@@ -22,7 +22,7 @@ class GPT(nn.Module):
         super(GPT, self).__init__()
         self.model = OpenAIGPTModel.from_pretrained("openai-community/openai-gpt")
         self.tokenizer = OpenAIGPTTokenizer.from_pretrained("openai-community/openai-gpt")
-        self.tokenizer.pad_token = self.tokenizer.eos_token
+        self.tokenizer.add_special_tokens({'pad_token': '[PAD]'})
         self.tokenizer.padding_side = 'left'
         self.linear = nn.Linear(self.model.config.hidden_size, num_classes)
         self.softmax = nn.Softmax(dim=-1)
