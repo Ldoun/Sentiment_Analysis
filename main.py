@@ -74,10 +74,10 @@ if __name__ == "__main__":
         )
         
         trainer = Trainer(
-            train_loader, valid_loader, model, loss_fn, optimizer, scheduler, device, args.patience, args.epochs, fold_result_path, fold_logger, tokenizer=model.tokenizer, max_length=args.max_length)
+            train_loader, valid_loader, model, loss_fn, optimizer, scheduler, device, args.patience, args.epochs, fold_result_path, fold_logger)
         trainer.train() #start training
 
-        test_dataset = TextDataSet(text=test_data['text'].values, label=test_data['sentiment'].values)
+        test_dataset = TextDataSet(text=test_data['text'].values, label=test_data['sentiment'].values, tokenizer=model.tokenizer, max_length=args.max_length)
         test_loader = DataLoader(
             test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers
         ) #make test data loader
