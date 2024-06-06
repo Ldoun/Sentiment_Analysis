@@ -57,7 +57,7 @@ if __name__ == "__main__":
         kfold_train_data = train_data.iloc[train_index]
         kfold_valid_data = train_data.iloc[valid_index]
 
-        model = getattr(models, args.model)(args).to(device) #make model based on the model name and args
+        model = getattr(models, args.model)(args.input_size, args.hidden_size, args.num_classes).to(device) #make model based on the model name and args
 
         train_dataset = TextDataSet(text=kfold_train_data['text'].values, label=kfold_train_data['sentiment'].values, tokenizer=model.tokenizer, max_length=args.max_length)
         valid_dataset = TextDataSet(text=kfold_valid_data['text'].values, label=kfold_valid_data['sentiment'].values, tokenizer=model.tokenizer, max_length=args.max_length)
