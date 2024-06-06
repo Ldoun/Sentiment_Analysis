@@ -2,8 +2,8 @@ import argparse
 from models import args_for_model
 
 def args_for_data(parser):
-    parser.add_argument('--train', type=str, default='../data/processed_train.csv')
-    parser.add_argument('--test', type=str, default='../data/processed_test.csv')
+    parser.add_argument('--train', type=str, default='../data/sentiment/processed_train.csv')
+    parser.add_argument('--test', type=str, default='../data/sentiment/processed_test.csv')
     parser.add_argument('--result_path', type=str, default='./result')
     
 def args_for_train(parser):
