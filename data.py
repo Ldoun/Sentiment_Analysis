@@ -10,7 +10,7 @@ class TextDataSet(Dataset):
 
 
     def __len__(self):
-        return len(self.file_list)
+        return len(self.label)
     
     def __getitem__(self, index):
         encoding = self.tokenizer.encode_plus(
