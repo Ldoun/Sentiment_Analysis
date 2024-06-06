@@ -84,4 +84,4 @@ if __name__ == "__main__":
         pred, target = trainer.test(test_loader)
 
         fold_logger.info(f'Acc: {accuracy_score(target, pred)}')
-        fold_logger.info(f'F1: {f1_score(target, pred)}')
+        fold_logger.info(f'F1: {f1_score(target, pred, average='macro')}')
