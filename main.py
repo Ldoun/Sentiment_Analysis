@@ -41,8 +41,9 @@ if __name__ == "__main__":
     if args.continue_train > 0:
         pass
 
-    skf = StratifiedKFold(n_splits=args.cv_k, random_state=args.seed, shuffle=True) #Using StratifiedKFold for cross-validation    
-    for fold, (train_index, valid_index) in enumerate(skf.split(train_data['text'], train_data['sentiment'])): #by skf every fold will have similar label distribution
+    skf = StratifiedKFold(n_splits=args.cv_k, random_state=args.seed, shuffle=True).split(train_data['text'], train_data['sentiment']) #Using StratifiedKFold for cross-validation    
+    for fold, (train_index, valid_index) in enumerate(skf): #by skf every fold will have similar label distribution
+        seed_everything(args.seed) #fix seed
         if args.continue_train > fold+1:
             logger.info(f'skipping {fold+1}-fold')
             continue
