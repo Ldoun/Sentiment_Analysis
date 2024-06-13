@@ -34,4 +34,5 @@ def get_sch(scheduler, optimizer, **kwargs):
             ],
             milestones=[kwargs['warmup_epochs']]
         )
-    
+    elif scheduler=='warmup':
+        return LinearAnnealingLR(optimizer, num_annealing_steps=kwargs['warmup_epochs'], num_total_steps=kwargs['warmup_epochs'],)
