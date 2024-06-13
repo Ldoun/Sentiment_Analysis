@@ -21,9 +21,9 @@ class Trainer():
     def train(self):
         best = np.inf
         for epoch in range(1,self.epochs+1):
+            print(f'lr: {self.scheduler.get_last_lr()}')
             loss_train, score_train = self.train_step()
             loss_val, score_val = self.valid_step()
-            print(f'lr: {self.scheduler.get_last_lr()}')
             self.scheduler.step()
 
             self.logger.info(f'Epoch {str(epoch).zfill(5)}: t_loss:{loss_train:.3f} t_score:{score_train:.3f} v_loss:{loss_val:.3f} v_score:{score_val:.3f}')
