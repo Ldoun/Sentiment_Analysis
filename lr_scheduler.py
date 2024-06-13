@@ -30,7 +30,7 @@ def get_sch(scheduler, optimizer, **kwargs):
             optimizer,
             schedulers=[
                 LinearAnnealingLR(optimizer, num_annealing_steps=kwargs['warmup_epochs'], num_total_steps=kwargs['warmup_epochs'],),
-                sch.CosineAnnealingLR(optimizer, T_max=100)
+                sch.CosineAnnealingLR(optimizer, T_max=30)
             ],
             milestones=[kwargs['warmup_epochs']]
         )
