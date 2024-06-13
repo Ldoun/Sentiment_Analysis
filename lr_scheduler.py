@@ -8,7 +8,7 @@ class base():
     def step(self):
         pass
 
-class LinearAnnealingLR(sch._LRScheduler):
+class Warmup(sch._LRScheduler):
     def __init__(self, optimizer, num_annealing_steps, num_total_steps):
         self.num_annealing_steps = num_annealing_steps
         self.num_total_steps = num_total_steps
@@ -19,7 +19,7 @@ class LinearAnnealingLR(sch._LRScheduler):
         if self._step_count <= self.num_annealing_steps:
             return [base_lr * self._step_count / self.num_annealing_steps for base_lr in self.base_lrs]
         else:
-            return [base_lr * (self.num_total_steps - self._step_count) / (self.num_total_steps - self.num_annealing_steps) for base_lr in self.base_lrs]
+            return self.base_lrs
 
 
 def get_sch(scheduler, optimizer, **kwargs):
@@ -29,10 +29,10 @@ def get_sch(scheduler, optimizer, **kwargs):
         return sch.SequentialLR(
             optimizer,
             schedulers=[
-                LinearAnnealingLR(optimizer, num_annealing_steps=kwargs['warmup_epochs'], num_total_steps=kwargs['warmup_epochs'],),
+                Warmup(optimizer, num_annealing_steps=kwargs['warmup_epochs'], num_total_steps=kwargs['warmup_epochs'],),
                 sch.CosineAnnealingLR(optimizer, T_max=30)
             ],
             milestones=[kwargs['warmup_epochs']]
         )
     elif scheduler=='warmup':
-        return LinearAnnealingLR(optimizer, num_annealing_steps=kwargs['warmup_epochs'], num_total_steps=kwargs['warmup_epochs'],)
+        return Warmup(optimizer, num_annealing_steps=kwargs['warmup_epochs'], num_total_steps=kwargs['warmup_epochs'],)
