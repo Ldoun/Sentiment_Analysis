@@ -23,6 +23,7 @@ class Trainer():
         for epoch in range(1,self.epochs+1):
             loss_train, score_train = self.train_step()
             loss_val, score_val = self.valid_step()
+            print(f'lr: {self.scheduler.get_last_lr()}')
             self.scheduler.step()
 
             self.logger.info(f'Epoch {str(epoch).zfill(5)}: t_loss:{loss_train:.3f} t_score:{score_train:.3f} v_loss:{loss_val:.3f} v_score:{score_val:.3f}')
@@ -48,7 +49,7 @@ class Trainer():
             attention_mask = batch['attention_mask'].to(self.device)
 
             self.optimizer.zero_grad()
-            output = self.model(x, attention_mask)            
+            output = self.model(x, attention_mask)        
             loss = self.loss_fn(output, y)
             loss.backward()
             self.optimizer.step()

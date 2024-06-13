@@ -23,7 +23,7 @@ class GPT(nn.Module):
         self.model = OpenAIGPTModel.from_pretrained("openai-community/openai-gpt")
         self.tokenizer = OpenAIGPTTokenizer.from_pretrained("openai-community/openai-gpt")
         self.tokenizer.add_special_tokens({'pad_token': '[PAD]'})
-        self.tokenizer.padding_side = 'left'
+        self.tokenizer.padding_side = 'right'
         self.model.resize_token_embeddings(len(self.tokenizer)) # The new number of tokens in the embedding matrix. Increasing the size will add newly initialized vectors at the end
         self.linear = nn.Linear(self.model.config.hidden_size, num_classes)
         self.softmax = nn.Softmax(dim=-1)
